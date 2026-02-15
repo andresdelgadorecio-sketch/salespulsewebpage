@@ -1,8 +1,9 @@
 #!/bin/sh
 
 # Start Next.js application in background
-echo "Starting Next.js..."
-node server.js &
+echo "Starting Next.js on port 5000..."
+# Force port via env var inline AND node args if needed, though env usually works for standalone
+PORT=5000 node server.js &
 NEXT_PID=$!
 
 # Start Telegram Bot in background
