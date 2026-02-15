@@ -1,0 +1,15 @@
+{
+    "mcpServers": {
+        "n8n-mcp": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "supergateway",
+                "--streamableHttp",
+                "https://n8n.testn8n.online/webhook/mcp-server",
+                "--header",
+                "authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWFjNTMzOS0zMzc5LTQwZTgtOWZmNS03Y2E5YzU2ZmZiMWUiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6ImIyNDQ5MjRhLWNmM2ItNDA4MC1iNjA2LTAxYTBhMTljMjYwNyIsImlhdCI6MTc2OTU4OTc0NX0.9V6ID8ATnAYtcdFs5kJ-p3IuUUGB3f9Vyh6o_VneTw0"
+            ]
+        }
+    }
+}

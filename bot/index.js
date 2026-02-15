@@ -1,0 +1,136 @@
+import { Telegraf, Markup } from 'telegraf';
+import 'dotenv/config';
+
+console.log('[DEBUG] Starting bot script...');
+
+// 1. Initialize Bot
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
+// 2. Middleware for logging
+bot.use(async (ctx, next) => {
+    const start = new Date();
+    await next();
+    const ms = new Date() - start;
+    console.log(`Response time: ${ms}ms`);
+});
+
+// 3. Start Command
+const sendWelcome = (ctx) => {
+    ctx.reply(
+        `👋 *¡Hola! Bienvenido al Soporte de SalesPulse.*
+
+Soy tu asistente de Inteligencia Artificial. ¿En qué puedo ayudarte hoy?`,
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('💰 Consultar Precios', 'pricing')],
+                [Markup.button.callback('🚀 Hablar con Ventas', 'talk_sales')],
+                [Markup.button.callback('❓ Preguntas Frecuentes', 'faq')],
+            ])
+        }
+    );
+};
+
+// 3. Start Command and Text Handler
+bot.start(sendWelcome);
+
+bot.on('text', (ctx) => {
+    // Respond to greetings or just show menu for any text for now
+    sendWelcome(ctx);
+});
+
+// 4. Pricing Flow
+bot.action('pricing', (ctx) => {
+    ctx.reply(
+        `*💎 DOMINIO DEL MERCADO - Planes 2026:*
+
+1️⃣ *FRANCOTIRADOR ($49 USD/mes)*
+   - Para Closers y Freelancers
+   - Análisis Táctico (15 leads/mes)
+   - Predictor Quirúrgico
+
+2️⃣ *TRACCIÓN ÉLITE ($149 USD/mes)* 🔥 _Recomendado_
+   - Para Equipos (hasta 5)
+   - Dashboard de Comando Grupal
+   - Sincronización Neural (Slack/Telegram)
+
+3️⃣ *SOBERANÍA ($449 USD/mes)*
+   - Corporativo / Scale-ups
+   - API Ilimitada "God Mode"
+   - Soporte Línea Roja 24/7
+
+¿Listo para dominar tu mercado?`,
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.url('🔥 Dominar mi Mercado (7 días gratis)', 'https://salespulse.demo/#pricing')],
+                [Markup.button.callback('🔙 Volver', 'start_over')]
+            ])
+        }
+    );
+});
+
+// 5. Sales Handoff
+bot.action('talk_sales', async (ctx) => {
+    ctx.reply(
+        `Perfecto. Un especialista humano se unirá al chat en breve. 👨‍💼
+
+Mientras tanto, cuéntanos:
+_¿Cuál es el tamaño actual de tu equipo de ventas?_`,
+        { parse_mode: 'Markdown' }
+    );
+    // Trigger n8n webhook
+    try {
+        await fetch('https://n8n.testn8n.online/webhook/sales-handoff', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ctx.from)
+        });
+        console.log(`[SUCCESS] Triggered n8n workflow for User ${ctx.from.id}`);
+    } catch (error) {
+        console.error(`[ERROR] Failed to trigger n8n:`, error);
+    }
+});
+
+// 6. FAQ
+bot.action('faq', (ctx) => {
+    ctx.reply(
+        `*Preguntas Frecuentes:*
+
+Q: ¿Necesito tarjeta de crédito?
+A: Solo para el plan Growth y superior.
+
+Q: ¿Se integra con HubSpot?
+A: Sí, en el plan Command Center.
+
+Q: ¿La precisión es real?
+A: Garantizamos un 94% basándonos en 6 meses de data histórica.`,
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('🔙 Volver', 'start_over')]
+            ])
+        }
+    );
+});
+
+// 7. Navigation Handlers
+bot.action('start_over', (ctx) => {
+    ctx.reply(
+        '¿En qué más te puedo ayudar?',
+        Markup.inlineKeyboard([
+            [Markup.button.callback('💰 Consultar Precios', 'pricing')],
+            [Markup.button.callback('🚀 Hablar con Ventas', 'talk_sales')],
+        ])
+    );
+});
+
+// 8. Launch
+console.log('[DEBUG] Calling bot.launch()...');
+bot.launch().then(() => {
+    console.log('🤖 SalesPulse Support Bot is running...');
+});
+
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));

@@ -1,0 +1,231 @@
+{
+    "name": "Lead Qualification & Enrichment",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "lead-qualification",
+                "options": {},
+                "formTitle": "Qualification Form",
+                "formDescription": "Please fill out the details starting your collaboration with us.",
+                "formFields": {
+                    "values": [
+                        {
+                            "displayName": "Full Name",
+                            "name": "name",
+                            "type": "string",
+                            "required": true,
+                            "default": ""
+                        },
+                        {
+                            "displayName": "Role",
+                            "name": "role",
+                            "type": "string",
+                            "required": true,
+                            "default": ""
+                        },
+                        {
+                            "displayName": "Business Name",
+                            "name": "business_name",
+                            "type": "string",
+                            "required": true,
+                            "default": ""
+                        },
+                        {
+                            "displayName": "Website",
+                            "name": "website",
+                            "type": "string",
+                            "required": true,
+                            "default": "https://"
+                        },
+                        {
+                            "displayName": "Budget",
+                            "name": "budget",
+                            "type": "number",
+                            "required": true,
+                            "default": 0
+                        },
+                        {
+                            "displayName": "Service Required",
+                            "name": "service",
+                            "type": "dropdown",
+                            "required": true,
+                            "default": "",
+                            "options": [
+                                {
+                                    "name": "Automation",
+                                    "value": "automation"
+                                },
+                                {
+                                    "name": "Web Design",
+                                    "value": "web_design"
+                                },
+                                {
+                                    "name": "Consulting",
+                                    "value": "consulting"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "id": "1",
+            "name": "n8n Form Trigger",
+            "type": "n8n-nodes-base.formTrigger",
+            "typeVersion": 2,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.perplexity.ai/chat/completions",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer YOUR_PERPLEXITY_API_KEY"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"model\": \"llama-3.1-sonar-small-128k-online\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a lead enrichment expert. Analyze the company based on the database and the provided website. Return a summary, estimated company size, and revenue if available. Act as a sales closer assistant preparing a briefing.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Analyze this lead:\\nName: {{$json.name}}\\nRole: {{$json.role}}\\nCompany: {{$json.business_name}}\\nWebsite: {{$json.website}}\\nService: {{$json.service}}\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "id": "2",
+            "name": "Perplexity Enrichment",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.budget }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": 5000,
+                            "operator": "larger",
+                            "output": 0
+                        },
+                        {
+                            "value2": 1000,
+                            "operator": "larger",
+                            "output": 1
+                        }
+                    ]
+                },
+                "fallbackOutput": 2
+            },
+            "id": "3",
+            "name": "Budget Classifier",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "## High Ticket Lead\n\n**Client**: {{$node[\"n8n Form Trigger\"].json[\"name\"]}}\n**Company**: {{$node[\"n8n Form Trigger\"].json[\"business_name\"]}}\n**Budget**: ${{$node[\"n8n Form Trigger\"].json[\"budget\"]}}\n\n**Perplexity Insight**:\n{{$json.choices[0].message.content}}",
+                "height": "500px",
+                "width": "500px"
+            },
+            "id": "4",
+            "name": "High Ticket Path",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1150,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "content": "## Low Ticket Lead\n\n**Client**: {{$node[\"n8n Form Trigger\"].json[\"name\"]}}\n**Budget**: ${{$node[\"n8n Form Trigger\"].json[\"budget\"]}}\n\nSend to automated checkout.",
+                "height": "100px",
+                "width": "100px"
+            },
+            "id": "5",
+            "name": "Low Ticket Path",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1150,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "## Manual Review\n\nBudget is low or unsure.\n\n**Contact**: {{$node[\"n8n Form Trigger\"].json[\"name\"]}}\n\nHuman review required.",
+                "height": "100px",
+                "width": "100px"
+            },
+            "id": "6",
+            "name": "Manual Review Path",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1150,
+                450
+            ]
+        }
+    ],
+    "connections": {
+        "n8n Form Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Perplexity Enrichment",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Perplexity Enrichment": {
+            "main": [
+                [
+                    {
+                        "node": "Budget Classifier",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Budget Classifier": {
+            "main": [
+                [
+                    {
+                        "node": "High Ticket Path",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Low Ticket Path",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Manual Review Path",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

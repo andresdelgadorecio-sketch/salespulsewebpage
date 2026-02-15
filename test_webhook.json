@@ -1,0 +1,24 @@
+{
+    "name": "Test Webhook",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "test-webhook",
+                "responseMode": "lastNode"
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "trigger",
+            "name": "Webhook Trigger"
+        }
+    ],
+    "connections": {},
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

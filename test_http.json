@@ -1,0 +1,50 @@
+{
+    "name": "Test HTTP",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "test-http",
+                "responseMode": "lastNode"
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "trigger",
+            "name": "Webhook Trigger"
+        },
+        {
+            "parameters": {
+                "url": "https://google.com",
+                "authentication": "none"
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                200,
+                0
+            ],
+            "id": "http",
+            "name": "HTTP Request"
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

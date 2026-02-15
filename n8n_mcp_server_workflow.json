@@ -1,0 +1,244 @@
+{
+    "name": "MCP Server Implementation",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "mcp-server",
+                "responseMode": "lastNode"
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "trigger",
+            "name": "MCP Webhook",
+            "webhookId": "mcp-server"
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.body.tool }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "list_workflows"
+                        },
+                        {
+                            "value2": "get_workflow",
+                            "output": 1
+                        },
+                        {
+                            "value2": "create_workflow",
+                            "output": 2
+                        },
+                        {
+                            "value2": "update_workflow",
+                            "output": 3
+                        },
+                        {
+                            "value2": "activate_workflow",
+                            "output": 4
+                        },
+                        {
+                            "value2": "deactivate_workflow",
+                            "output": 5
+                        }
+                    ]
+                },
+                "fallbackOutput": 6
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                250,
+                0
+            ],
+            "id": "router",
+            "name": "Tool Router"
+        },
+        {
+            "parameters": {
+                "url": "https://n8n.testn8n.online/api/v1/workflows",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth"
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                500,
+                -100
+            ],
+            "id": "list_workflows",
+            "name": "List Workflows",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "n8n_api_key",
+                    "name": "n8n API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "={{ 'https://n8n.testn8n.online/api/v1/workflows/' + $json.body.args.id }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth"
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                500,
+                100
+            ],
+            "id": "get_workflow",
+            "name": "Get Workflow",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "n8n_api_key",
+                    "name": "n8n API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://n8n.testn8n.online/api/v1/workflows",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "value": "={{ $json.body.args.name }}"
+                        },
+                        {
+                            "name": "nodes",
+                            "value": "={{ $json.body.args.nodes }}"
+                        },
+                        {
+                            "name": "connections",
+                            "value": "={{ $json.body.args.connections }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                500,
+                300
+            ],
+            "id": "create_workflow",
+            "name": "Create Workflow",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "n8n_api_key",
+                    "name": "n8n API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{ 'https://n8n.testn8n.online/api/v1/workflows/' + $json.body.args.id + '/activate' }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth"
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                500,
+                700
+            ],
+            "id": "activate_workflow",
+            "name": "Activate Workflow",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "n8n_api_key",
+                    "name": "n8n API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{ 'https://n8n.testn8n.online/api/v1/workflows/' + $json.body.args.id + '/deactivate' }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth"
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                500,
+                900
+            ],
+            "id": "deactivate_workflow",
+            "name": "Deactivate Workflow",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "n8n_api_key",
+                    "name": "n8n API Key"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "MCP Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Tool Router",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tool Router": {
+            "main": [
+                [
+                    {
+                        "node": "List Workflows",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Get Workflow",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Create Workflow",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Activate Workflow",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Deactivate Workflow",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

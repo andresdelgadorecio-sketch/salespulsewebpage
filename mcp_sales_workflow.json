@@ -1,0 +1,99 @@
+{
+    "name": "MCP Sales Tool (mcpventas)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "mcp-sales",
+                "options": {}
+            },
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ],
+            "webhookId": "mcp-sales-webhook"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json.body.wants_demo}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "name": "Interested in Demo?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\n  \"message\": \"Excelente selección. Por favor completa este formulario para agendar tu demo: https://n8n.testn8n.online/form/demo-request\",\n  \"action\": \"send_link\"\n}",
+                "options": {}
+            },
+            "name": "Send Form Link",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\n  \"message\": \"Entendido. ¿Hay algo más en lo que pueda ayudarte sobre nuestros servicios?\",\n  \"action\": \"continue_chat\"\n}",
+                "options": {}
+            },
+            "name": "Standard Reply",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                900,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Interested in Demo?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Interested in Demo?": {
+            "main": [
+                [
+                    {
+                        "node": "Send Form Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Standard Reply",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {}
+}

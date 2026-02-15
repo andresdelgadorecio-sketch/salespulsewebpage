@@ -1,0 +1,230 @@
+{
+    "name": "Lead Qualification & Enrichment (Perplexity)",
+    "nodes": [
+        {
+            "parameters": {
+                "formTitle": "Lead Qualification Form",
+                "formDescription": "Please fill in your details",
+                "formFields": {
+                    "values": [
+                        {
+                            "displayName": "Name",
+                            "name": "name",
+                            "type": "string",
+                            "required": true
+                        },
+                        {
+                            "displayName": "Role",
+                            "name": "role",
+                            "type": "string",
+                            "required": true
+                        },
+                        {
+                            "displayName": "Business Name",
+                            "name": "business",
+                            "type": "string",
+                            "required": true
+                        },
+                        {
+                            "displayName": "Website",
+                            "name": "website",
+                            "type": "string",
+                            "required": true
+                        },
+                        {
+                            "displayName": "Budget",
+                            "name": "budget",
+                            "type": "string",
+                            "required": true,
+                            "placeholder": "e.g. $1000, $5000+"
+                        },
+                        {
+                            "displayName": "Service Needed",
+                            "name": "service",
+                            "type": "string",
+                            "required": true
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.formTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "trigger",
+            "name": "Form Trigger"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.perplexity.ai/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "sonar-pro"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "={{ [{\"role\": \"system\", \"content\": \"You are a Sales Intelligence Agent. Your goal is to enrich lead data for a closer. Search the internet for the company and provide a concise 3-paragraph report: 1. Company Overview & Size. 2. Recent News/Activities. 3. Estimated Tech Stack.\"}, {\"role\": \"user\", \"content\": \"Enrich this lead:\\nName: \" + $json.body.name + \"\\nRole: \" + $json.body.role + \"\\nBusiness: \" + $json.body.business + \"\\nWebsite: \" + $json.body.website + \"\\nBudget: \" + $json.body.budget + \"\\nService: \" + $json.body.service}] }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                250,
+                0
+            ],
+            "id": "perplexity_agent",
+            "name": "Perplexity Agent",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "Create_New_Credential_For_Perplexity",
+                    "name": "Perplexity API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json[\"body\"][\"budget\"] }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "operation": "contains",
+                            "value2": "High",
+                            "output": 0
+                        },
+                        {
+                            "operation": "contains",
+                            "value2": "Low",
+                            "output": 1
+                        }
+                    ]
+                },
+                "fallbackOutput": 2
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                500,
+                0
+            ],
+            "id": "classifier",
+            "name": "Budget Classifier"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "operation": "send",
+                "toEmail": "juan@gmail.com",
+                "subject": "High Ticket Lead Alert",
+                "text": "={{ $json.body.name }} from {{ $json.body.business }} is a High Ticket lead."
+            },
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2,
+            "position": [
+                750,
+                -100
+            ],
+            "id": "email_juan",
+            "name": "Email Juan"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "operation": "send",
+                "toEmail": "matias@gmail.com",
+                "subject": "Low Ticket Lead Alert",
+                "text": "={{ $json.body.name }} from {{ $json.body.business }} is a Low Ticket lead."
+            },
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2,
+            "position": [
+                750,
+                100
+            ],
+            "id": "email_matias",
+            "name": "Email Matias"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "operation": "send",
+                "toEmail": "soporte@gmail.com",
+                "subject": "Lead Review Needed",
+                "text": "={{ $json.body.name }} from {{ $json.body.business }} needs manual review."
+            },
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2,
+            "position": [
+                750,
+                300
+            ],
+            "id": "email_soporte",
+            "name": "Email Soporte"
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Perplexity Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Perplexity Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Budget Classifier",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Budget Classifier": {
+            "main": [
+                [
+                    {
+                        "node": "Email Juan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Email Matias",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Email Soporte",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner"
+    }
+}

@@ -1,0 +1,112 @@
+{
+    "name": "Lead Qualification & Enrichment (Perplexity)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "lead-qualification",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "trigger",
+            "name": "Webhook Trigger"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.perplexity.ai/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "headerAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "sonar-pro"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "={{ [{\"role\": \"system\", \"content\": \"You are a Sales Intelligence Agent. Your goal is to enrich lead data for a closer. Search the internet for the company and provide a concise 3-paragraph report: 1. Company Overview & Size. 2. Recent News/Activities. 3. Estimated Tech Stack.\"}, {\"role\": \"user\", \"content\": \"Enrich this lead:\\nName: \" + $json.body.name + \"\\nRole: \" + $json.body.role + \"\\nBusiness: \" + $json.body.business + \"\\nWebsite: \" + $json.body.website + \"\\nBudget: \" + $json.body.budget + \"\\nService: \" + $json.body.service}] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                250,
+                0
+            ],
+            "id": "perplexity_agent",
+            "name": "Perplexity Agent",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "Create_New_Credential_For_Perplexity",
+                    "name": "Perplexity API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json[\"body\"][\"budget\"] }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "operation": "contains",
+                            "value2": "High",
+                            "output": 0
+                        },
+                        {
+                            "operation": "contains",
+                            "value2": "Low",
+                            "output": 1
+                        }
+                    ]
+                },
+                "fallbackOutput": 2
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3,
+            "position": [
+                500,
+                0
+            ],
+            "id": "classifier",
+            "name": "Budget Classifier"
+        }
+    ],
+    "settings": {},
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Perplexity Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Perplexity Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Budget Classifier",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

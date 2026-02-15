@@ -1,0 +1,115 @@
+{
+    "name": "Form Response Fulfillment",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "demo-request",
+                "formTitle": "Solicitud de Demo - Sales Pulse",
+                "formDescription": "Por favor completa tus datos para agendar una demostración.",
+                "formFields": {
+                    "values": [
+                        {
+                            "fieldLabel": "Nombre Completo",
+                            "required": true
+                        },
+                        {
+                            "fieldLabel": "Email Corporativo",
+                            "fieldType": "email",
+                            "required": true
+                        },
+                        {
+                            "fieldLabel": "País",
+                            "required": true
+                        },
+                        {
+                            "fieldLabel": "Empresa",
+                            "required": true
+                        },
+                        {
+                            "fieldLabel": "Celular de Contacto",
+                            "fieldType": "number",
+                            "required": true
+                        },
+                        {
+                            "fieldLabel": "¿Por qué estás interesado en CRM Pulse?",
+                            "fieldType": "textarea",
+                            "required": true
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Demo Request Form",
+            "type": "n8n-nodes-base.formTrigger",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ],
+            "webhookId": "demo-request-form"
+        },
+        {
+            "parameters": {
+                "fromEmail": "bot@salespulse.com",
+                "toEmail": "andres.delgado.recio@gmail.com",
+                "subject": "New Demo Request - Interest in Pulse",
+                "text": "=New Lead Details:\n\nName: {{$json.name_completo}}\nEmail: {{$json.email_corporativo}}\nCountry: {{$json['país']}}\nCompany: {{$json.empresa}}\nPhone: {{$json.celular_de_contacto}}\nReason: {{$json['¿por_qué_estás_interesado_en_crm_pulse?']}}",
+                "options": {}
+            },
+            "name": "Email to Andres",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 1,
+            "position": [
+                680,
+                200
+            ],
+            "credentials": {
+                "smtp": {
+                    "id": "YOUR_SMTP_CREDENTIALS",
+                    "name": "SalesPulse SMTP"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "no-reply@salespulse.com",
+                "toEmail": "={{$json.email_corporativo}}",
+                "subject": "Gracias por tu interés en Sales Pulse",
+                "text": "=Hola {{$json.name_completo}},\n\nHemos recibido tu solicitud de demo. Uno de nuestros expertos te contactará pronto para coordinar una reunión.\n\nSaludos,\nEquipo Sales Pulse",
+                "options": {}
+            },
+            "name": "Email to Client",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 1,
+            "position": [
+                680,
+                400
+            ],
+            "credentials": {
+                "smtp": {
+                    "id": "YOUR_SMTP_CREDENTIALS",
+                    "name": "SalesPulse SMTP"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Demo Request Form": {
+            "main": [
+                [
+                    {
+                        "node": "Email to Andres",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email to Client",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {}
+}

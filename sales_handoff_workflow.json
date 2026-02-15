@@ -1,0 +1,136 @@
+{
+    "name": "Sales Handoff Bot System (AI Agent)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "sales-handoff",
+                "options": {}
+            },
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                380,
+                300
+            ],
+            "webhookId": "sales-handoff-webhook"
+        },
+        {
+            "parameters": {
+                "options": {
+                    "systemMessage": "You are a helpful sales assistant for SalesPulse. Your goal is to qualify leads. If a user asks to talk to sales or seems interested, ask them if they would like a demo. You have a tool called 'mcpventas' that can handle the demo interest logic. Use it when appropriate."
+                }
+            },
+            "name": "AI Agent",
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 1,
+            "position": [
+                600,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-pro",
+                "options": {}
+            },
+            "name": "Google Gemini Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                600,
+                500
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIALS",
+                    "name": "Google Gemini Api"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "name": "mcpventas",
+                "description": "Call this tool when the user is interested in a demo or talking to sales. It will check for options and return a link.",
+                "workflowId": "KBq23Njyjwt0xynm"
+            },
+            "name": "MCP Client",
+            "type": "n8n-nodes-base.workflowTool",
+            "typeVersion": 1,
+            "position": [
+                880,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{$json.body.id}}",
+                "text": "={{$json.output}}",
+                "additionalFields": {
+                    "parse_mode": "Markdown"
+                }
+            },
+            "name": "Send a text message",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "telegramApi": {
+                    "id": "YOUR_TELEGRAM_CREDENTIALS",
+                    "name": "Telegram Sales Bot"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MCP Client": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Send a text message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {}
+}
