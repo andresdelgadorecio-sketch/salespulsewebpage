@@ -9,9 +9,18 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // 2. Middleware for logging
 bot.use(async (ctx, next) => {
     const start = new Date();
-    await next();
+    try {
+        await next();
+    } catch (err) {
+        console.error('Error in middleware:', err);
+    }
     const ms = new Date() - start;
     console.log(`Response time: ${ms}ms`);
+});
+
+// Global error handler
+bot.catch((err, ctx) => {
+    console.error(`Ooops, encountered an error for ${ctx.updateType}`, err);
 });
 
 // 3. Start Command
