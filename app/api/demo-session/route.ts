@@ -8,16 +8,17 @@ export async function POST() {
 
     const demoToken = "demo-session-token-" + Date.now();
 
-    // Crear la cookie de sesión
-    // Nota: En Next.js 15+, cookies() retorna una promesa
-    const cookieStore = await cookies();
-    cookieStore.set("session", demoToken, {
+    // Create response object
+    const response = NextResponse.json({ ok: true });
+
+    // Set cookie on response object
+    response.cookies.set("session", demoToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 60 * 60, // 1 hora
+        maxAge: 60 * 60, // 1 hour
         path: "/",
     });
 
-    return NextResponse.json({ ok: true });
+    return response;
 }
