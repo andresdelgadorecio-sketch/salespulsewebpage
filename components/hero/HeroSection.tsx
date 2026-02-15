@@ -25,7 +25,7 @@ export function HeroSection() {
                     Nuevo: Análisis de Pipeline con IA
                 </div>
 
-                <h1 className="max-w-4xl mx-auto mb-6 text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/50 animate-fade-in-up md:text-7xl font-display">
+                <h1 className="max-w-4xl mx-auto mb-6 text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/50 animate-fade-in-up font-display leading-tight">
                     Deja de Adivinar. <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
                         Empieza a Cerrar.
