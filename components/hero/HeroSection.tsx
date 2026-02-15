@@ -55,6 +55,29 @@ export function HeroSection() {
                     </Button>
                 </motion.div>
 
+                {/* Quick Demo QR Block */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                    className="mt-8 flex justify-center"
+                >
+                    <div className="quick-demo-card flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl max-w-[520px] mx-auto text-left">
+                        <div className="shrink-0 bg-white p-2 rounded-lg">
+                            {/* Adjust width/height as needed, keeping aspect ratio */}
+                            <img src="/qr-demo.svg" alt="Escanea para probar" className="w-[120px] h-[120px]" />
+                        </div>
+                        <div className="flex flex-col">
+                            <h3 className="text-lg font-bold text-white mb-1">Prueba en 30 segundos</h3>
+                            <p className="text-slate-300 text-sm mb-1 leading-tight">Escanea el QR y entra a una demo lista para usar.</p>
+                            <p className="text-xs text-slate-500 mb-2">Sin registro. Datos ficticios. Acceso limitado.</p>
+                            <a href="http://aplicacion-salespulse.testn8n.online/demo" className="text-primary text-xs underline hover:text-primary/80 transition-colors">
+                                Abrir demo en este dispositivo
+                            </a>
+                        </div>
+                    </div>
+                </motion.div>
+
                 {/* Dashboard Mockup */}
                 <motion.div
                     initial={{ opacity: 0, y: 50, scale: 0.95 }}
