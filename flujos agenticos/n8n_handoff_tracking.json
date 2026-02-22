@@ -54,13 +54,29 @@
         },
         {
             "parameters": {
-                "notice": "This workflow currently only logs execution in n8n. In the future, it can be connected to Supabase or Google Sheets."
+                "fromEmail": "salespulse@testn8n.online",
+                "toEmail": "andres.delgado.recio@gmail.com",
+                "subject": "📢 Nuevo Lead en Telegram: {{$json.first_name}}",
+                "html": "<h3>¡Nuevo contacto interesado en Ventas!</h3><p><b>Nombre:</b> {{$json.first_name}}<br><b>Username:</b> @{{$json.username}}<br><b>ID Telegram:</b> {{$json.user_id}}<br><b>Bot de contacto:</b> {{$json.target_bot}}</p><p><i>Fecha: {{$json.timestamp}}</i></p>",
+                "options": {}
+            },
+            "name": "Send Email Notification",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 1,
+            "position": [
+                540,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "notice": "This workflow logs execution and sends notifications."
             },
             "name": "Log Tracking",
             "type": "n8n-nodes-base.noOp",
             "typeVersion": 1,
             "position": [
-                540,
+                760,
                 300
             ]
         }
@@ -78,6 +94,17 @@
             ]
         },
         "Format Lead Data": {
+            "main": [
+                [
+                    {
+                        "node": "Send Email Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Email Notification": {
             "main": [
                 [
                     {
