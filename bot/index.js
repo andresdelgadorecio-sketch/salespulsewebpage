@@ -72,7 +72,7 @@ bot.action('pricing', (ctx) => {
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
-                [Markup.button.url('🔥 Dominar mi Mercado (7 días gratis)', 'https://salespulse.demo/#pricing')],
+                [Markup.button.url('🔥 Dominar mi Mercado (7 días gratis)', 'http://aplicacion-salespulse.testn8n.online/demo')],
                 [Markup.button.callback('🔙 Volver', 'start_over')]
             ])
         }
