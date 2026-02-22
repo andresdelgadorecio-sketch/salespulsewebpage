@@ -13,7 +13,7 @@ Redirigir a los usuarios del bot de soporte al bot de atención personalizada de
 1. El usuario solicita hablar con ventas.
 2. El sistema consulta `execution/get_sales_link.py`.
 3. Se presenta al usuario un botón claro de "Ir a Ventas" que abre la conversación con el bot especializado.
-4. **Seguimiento en n8n**: El bot envía un POST al webhook de n8n (`/webhook/sales-handoff`) con los datos del usuario para registro y seguimiento comercial.
+4. **Seguimiento en n8n**: El bot envía un POST al webhook de n8n (`/webhook/sales-handoff`) con los datos del usuario para registro y seguimiento comercial (redirigiendo a `@ventassalespulse`).
 
 ## Salidas
 - Enlace de redirección a Telegram.

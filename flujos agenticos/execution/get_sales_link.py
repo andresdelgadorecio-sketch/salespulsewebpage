@@ -4,7 +4,7 @@ import sys
 def get_sales_link():
     # En el futuro, esto podría rotar entre varios vendedores o bots
     # según disponibilidad, carga de trabajo o región.
-    sales_bot_username = "VentasSalesPulseBot"
+    sales_bot_username = "ventassalespulse"
     sales_link = f"https://t.me/{sales_bot_username}"
     
     result = {

@@ -81,23 +81,26 @@ bot.action('pricing', (ctx) => {
 
 // 5. Sales Handoff
 bot.action('talk_sales', async (ctx) => {
-    const salesBotUsername = "VentasSalesPulseBot";
-    const salesLink = `https://t.me/${salesBotUsername}`;
-
-    await ctx.reply(
-        `Perfecto. Para una atención personalizada, por favor contacta a nuestro equipo de ventas directamente aquí:`,
-        {
-            parse_mode: 'Markdown',
-            ...Markup.inlineKeyboard([
-                [Markup.button.url('💼 Hablar con Asesor de Ventas', salesLink)],
-                [Markup.button.callback('🔙 Volver', 'start_over')]
-            ])
-        }
-    );
-
-    // Trigger n8n webhook for tracking
     try {
-        await fetch('https://n8n.testn8n.online/webhook/sales-handoff', {
+        // Answer the callback query to remove the loading state on the button
+        await ctx.answerCbQuery();
+
+        const salesBotUsername = "ventassalespulse";
+        const salesLink = `https://t.me/${salesBotUsername}`;
+
+        await ctx.reply(
+            `Perfecto. Para una atención personalizada, por favor contacta a nuestro equipo de ventas directamente aquí:`,
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.url('💼 Hablar con Asesor de Ventas', salesLink)],
+                    [Markup.button.callback('🔙 Volver', 'start_over')]
+                ])
+            }
+        );
+
+        // Trigger n8n webhook for tracking (asynchronous to not block the bot)
+        fetch('https://n8n.testn8n.online/webhook/sales-handoff', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -105,10 +108,15 @@ bot.action('talk_sales', async (ctx) => {
                 action: 'handoff_to_sales',
                 target_bot: salesBotUsername
             })
+        }).then(res => {
+            if (res.ok) console.log(`[SUCCESS] Tracking handoff for User ${ctx.from.id}`);
+            else console.error(`[ERROR] n8n responded with status ${res.status}`);
+        }).catch(error => {
+            console.error(`[ERROR] Failed to trigger tracking:`, error);
         });
-        console.log(`[SUCCESS] Tracking handoff for User ${ctx.from.id}`);
+
     } catch (error) {
-        console.error(`[ERROR] Failed to trigger tracking:`, error);
+        console.error(`[ERROR] Error in talk_sales action:`, error);
     }
 });
 
