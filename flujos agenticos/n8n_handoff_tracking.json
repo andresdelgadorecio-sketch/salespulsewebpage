@@ -1,0 +1,95 @@
+{
+    "name": "Sales Handoff Tracking",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "sales-handoff",
+                "options": {}
+            },
+            "name": "Handoff Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ],
+            "webhookId": "sales-handoff-tracking-webhook"
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "user_id",
+                            "value": "={{$json.body.id}}"
+                        },
+                        {
+                            "name": "username",
+                            "value": "={{$json.body.username}}"
+                        },
+                        {
+                            "name": "first_name",
+                            "value": "={{$json.body.first_name}}"
+                        },
+                        {
+                            "name": "target_bot",
+                            "value": "={{$json.body.target_bot}}"
+                        },
+                        {
+                            "name": "timestamp",
+                            "value": "={{$now}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Format Lead Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "notice": "This workflow currently only logs execution in n8n. In the future, it can be connected to Supabase or Google Sheets."
+            },
+            "name": "Log Tracking",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                540,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Handoff Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Format Lead Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Lead Data": {
+            "main": [
+                [
+                    {
+                        "node": "Log Tracking",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

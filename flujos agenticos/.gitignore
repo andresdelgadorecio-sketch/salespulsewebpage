@@ -1,0 +1,8 @@
+# .gitignore for Agentic Workflows
+.tmp/
+.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+token.json
+credentials.json

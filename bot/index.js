@@ -81,23 +81,34 @@ bot.action('pricing', (ctx) => {
 
 // 5. Sales Handoff
 bot.action('talk_sales', async (ctx) => {
-    ctx.reply(
-        `Perfecto. Un especialista humano se unirá al chat en breve. 👨‍💼
+    const salesBotUsername = "VentasSalesPulseBot";
+    const salesLink = `https://t.me/${salesBotUsername}`;
 
-Mientras tanto, cuéntanos:
-_¿Cuál es el tamaño actual de tu equipo de ventas?_`,
-        { parse_mode: 'Markdown' }
+    await ctx.reply(
+        `Perfecto. Para una atención personalizada, por favor contacta a nuestro equipo de ventas directamente aquí:`,
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.url('💼 Hablar con Asesor de Ventas', salesLink)],
+                [Markup.button.callback('🔙 Volver', 'start_over')]
+            ])
+        }
     );
-    // Trigger n8n webhook
+
+    // Trigger n8n webhook for tracking
     try {
         await fetch('https://n8n.testn8n.online/webhook/sales-handoff', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ctx.from)
+            body: JSON.stringify({
+                ...ctx.from,
+                action: 'handoff_to_sales',
+                target_bot: salesBotUsername
+            })
         });
-        console.log(`[SUCCESS] Triggered n8n workflow for User ${ctx.from.id}`);
+        console.log(`[SUCCESS] Tracking handoff for User ${ctx.from.id}`);
     } catch (error) {
-        console.error(`[ERROR] Failed to trigger n8n:`, error);
+        console.error(`[ERROR] Failed to trigger tracking:`, error);
     }
 });
 
